@@ -41,10 +41,52 @@ class Event:
         return (f"ID: {id} n/ Event title: {self.title} n/ Description: {self.description}"
                 f" n/ Time: {self.start_at} - {self.end_at}")
 
+class Day:
+    def __init__(self, date_: date):
+        self.slots: dict[time, str | None] = {}
+        self._init_slots()
+
+    def _init_slots(self):
+        current_time = time(0, 0)
+        while current_time < time(23, 45):
+            self.slots[current_time] = None
+            minutes = current_time.hour * 60 + current_time.minute + 15
+            hours, minutes = divmod(minutes, 60)
+            current_time = time(hours, minutes)
+
+    def add_event(self, event_id: str, start_at: time, end_at: time):
+        current_time = start_at
+        slots_to_fill = []
+        while current_time < end_at:
+            if self.slots.get(current_time) is not None:
+                from app.services.util import slot_not_available_error
+                slot_not_available_error()
+
+        for slot in slots_to_fill:
+            self.slots[slot] = event_id
+
+    def delete_event(self, event_id: str):
+        deleted = False
+        for slot, saved_id in self.slots.items():
+            if saved_id == event_id:
+                self.slots[slot]= None
+                deleted= True
+        if not deleted:
+            event_not_found_error()
+
+    def update_event(self, event_id: str, start_at: time, end_at:time):
+        for slot in self.slots:
+            if self.slots[slot] == event_id:
+                self.slots[slot] = None
+
+        for slot in self.slots:
+            if start_at <= slot < end_at:
+                if self.slots[slot]:
+                    slot_not_available_error()
+               else:
+                   self.slots[slot] = event_id
 
 
-
-# TODO: Implement Day class here
 
 
 # TODO: Implement Calendar class here
